@@ -52,7 +52,7 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { putDevice } from '@/modules/cmdb/api/dcim.js'
-import { DEVICE_CITYPE_NAME } from '../../../constants.js'
+import { DEVICE_CITYPE_MANUFACTURER, DEVICE_CITYPE_MANUFACTURER2, DEVICE_CITYPE_NAME } from '../../../constants.js'
 
 import RackUnitView from './rackUnitView.vue'
 import DeviceForm from './deviceForm/index.vue'
@@ -134,7 +134,7 @@ export default {
       _deviceList.forEach((device, index) => {
         const CITYpe = CITypeMap?.[device?._type] || {}
 
-        device.deviceImage = this.getDeviceViewImage(CITYpe?.name)
+        device.deviceImage = this.getDeviceViewImage(CITYpe?.name, device?.server_manufacturers, device?.u_count)
         device.name = device?.[CITYpe?.show_key] || device._id || ''
         device.icon = CITYpe?.icon || ''
         device.CITypeName = CITYpe?.alias || CITYpe?.name || ''
@@ -198,7 +198,7 @@ export default {
       this.countList = Array.from({ length: this.rackData.u_count }, (_, i) => this.rackData.u_count - i)
     },
 
-    getDeviceViewImage(name) {
+    getDeviceViewImage(name, manu, u_count) {
       const image = {
         front: require('@/modules/cmdb/assets/dcim/device/server_front.png'),
         rear: require('@/modules/cmdb/assets/dcim/device/server_rear.png')
@@ -214,8 +214,23 @@ export default {
           image.rear = require('@/modules/cmdb/assets/dcim/device/firewall_rear.png')
           break
         case DEVICE_CITYPE_NAME.SERVER:
-          image.front = require('@/modules/cmdb/assets/dcim/device/server_front.png')
-          image.rear = require('@/modules/cmdb/assets/dcim/device/server_rear.png')
+          const imageContext = require.context('@/modules/cmdb/assets/dcim/device/server',
+            false,
+            /\.png$/
+          )
+          let frontFileName
+          if (manu in DEVICE_CITYPE_MANUFACTURER2) {
+            frontFileName = `${DEVICE_CITYPE_MANUFACTURER2[manu]}_${u_count}u.png`
+          } else {
+            frontFileName = `front_${u_count}u.png`
+          }
+          const rearFileName = `rear_${u_count}u.png`
+          image.front = imageContext.keys().includes(`./${frontFileName}`)
+            ? imageContext(`./${frontFileName}`)
+            : imageContext('./front_1u.png')
+          image.rear = imageContext.keys().includes(`./${rearFileName}`)
+            ? imageContext(`./${rearFileName}`)
+            : imageContext('./rear_1u.png')
           break
         case DEVICE_CITYPE_NAME.RAID:
           image.front = require('@/modules/cmdb/assets/dcim/device/raid_front.png')

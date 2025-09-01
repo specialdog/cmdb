@@ -87,9 +87,11 @@
 
               <div class="rack-container-main-list-device-header"></div>
               <img
-                v-for="(unitIndex) in item.unitCount"
-                :key="unitIndex"
                 :src="item.deviceImage[viewType]"
+                class="rack-device-image"
+                :style="{
+                  height: (unitHeight * item.unitCount - 6) + 'px'
+                }"
               />
 
               <div
@@ -367,7 +369,15 @@ export default {
           background-color: #5D6271;
         }
 
-        img {
+        .rack-device-image {
+          width: 195px;
+          height: auto;
+          max-height: calc(100% - 6px); /* 减去header高度 */
+          object-fit: contain; /* 保持图片比例，完整显示 */
+          /* 或者使用 object-fit: cover; 如果希望填满整个区域 */
+        }
+        /* 保持原有img样式用于其他可能的图片 */
+        img:not(.rack-device-image) {
           width: 195px;
           height: 17px;
         }

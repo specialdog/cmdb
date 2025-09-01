@@ -4,7 +4,7 @@
       <a
         href="https://veops.cn/"
         target="_blank"
-      >维易科技</a>
+      >浙江大学</a>
       <a
         href="https://github.com/sendya/ant-design-pro-vue"
         target="_blank"
@@ -15,7 +15,7 @@
     </div>
     <div class="copyright">
       Copyright
-      <a-icon type="copyright" /> 2021-2023 <span>@维易科技</span>
+      <a-icon type="copyright" /> 2021-2023 <span>@浙江大学</span>
     </div>
   </div>
 </template>

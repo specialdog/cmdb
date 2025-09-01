@@ -963,7 +963,7 @@ export const multicolorIconList = [
       label: 'PC'
     }, {
       value: 'caise-rack',
-      label: '机柜'
+      label: '机架'
     }, {
       value: 'caise-computer_room',
       label: '机房'

@@ -444,7 +444,7 @@ const cs_zh = {
     selectApp: '选择应用',
   },
   login: {
-    loginText: '维易科技 让运维变简单',
+    loginText: '浙江大学 IDC资产管理平台',
     username: '用户名/邮箱',
     usernameRequired: '请输入用户名或邮箱',
     password: '密码',

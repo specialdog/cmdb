@@ -22,6 +22,28 @@ export const DEVICE_CITYPE_NAME = {
   RAID: 'raid'
 }
 
+export const DEVICE_CITYPE_MANUFACTURER = {
+  HUAWEI: '华为',
+  IBM: 'IBM',
+  H3C: '华三',
+  DELL: '戴尔',
+  HP: '惠普',
+  KEDACOM: '科达',
+  CISCO: '思科',
+  LENOVO: '联想'
+}
+
+export const DEVICE_CITYPE_MANUFACTURER2 = {
+  '华为': 'huawei',
+  'IBM': 'ibm',
+  '华三': 'h3c',
+  '戴尔': 'dell',
+  '惠普': 'hp',
+  '科达': 'kedacom',
+  '思科': 'cisco',
+  '联想': 'lenovo'
+}
+
 const createTypeNameMap = (typeObj, typeNameObj) => {
   const map = {}
 

@@ -52,7 +52,7 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { putDevice } from '@/modules/cmdb/api/dcim.js'
-import { DEVICE_CITYPE_MANUFACTURER, DEVICE_CITYPE_MANUFACTURER2, DEVICE_CITYPE_NAME } from '../../../constants.js'
+import { DEVICE_CITYPE_MANUFACTURER2, DEVICE_CITYPE_NAME } from '../../../constants.js'
 
 import RackUnitView from './rackUnitView.vue'
 import DeviceForm from './deviceForm/index.vue'
@@ -213,6 +213,7 @@ export default {
           image.front = require('@/modules/cmdb/assets/dcim/device/firewall_front.png')
           image.rear = require('@/modules/cmdb/assets/dcim/device/firewall_rear.png')
           break
+        case DEVICE_CITYPE_NAME.STORAGE:
         case DEVICE_CITYPE_NAME.SERVER:
           const imageContext = require.context('@/modules/cmdb/assets/dcim/device/server',
             false,

@@ -19,18 +19,8 @@ export const DEVICE_CITYPE_NAME = {
   ROUTER: 'router',
   FIRE_WALL: 'firewall',
   SERVER: 'server',
-  RAID: 'raid'
-}
-
-export const DEVICE_CITYPE_MANUFACTURER = {
-  HUAWEI: '华为',
-  IBM: 'IBM',
-  H3C: '华三',
-  DELL: '戴尔',
-  HP: '惠普',
-  KEDACOM: '科达',
-  CISCO: '思科',
-  LENOVO: '联想'
+  RAID: 'raid',
+  STORAGE: 'storage'
 }
 
 export const DEVICE_CITYPE_MANUFACTURER2 = {

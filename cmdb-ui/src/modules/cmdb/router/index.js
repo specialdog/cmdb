@@ -96,7 +96,7 @@ const genCmdbRoutes = async () => {
         path: '/cmdb/dcim',
         component: () => import('../views/dcim'),
         name: 'cmdb_dcim',
-        meta: { title: 'cmdb.menu.dcim', appName: 'cmdb', icon: 'veops-data_center', selectedIcon: 'veops-data_center', keepAlive: false, permission: ['cmdb_admin', 'admin'] }
+        meta: { title: 'cmdb.menu.dcim', appName: 'cmdb', icon: 'veops-data_center', selectedIcon: 'veops-data_center', keepAlive: false }
       },
       {
         path: '/cmdb/disabled2',

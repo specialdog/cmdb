@@ -89,6 +89,15 @@
             :rackId="rackId"
           />
         </a-tab-pane>
+        <a-tab-pane
+          key="rackImages"
+          :tab="$t('cmdb.dcim.rackImages')"
+        >
+          <RackImages
+            v-if="tabActive === 'rackImages'"
+            :rackId="rackId"
+          />
+        </a-tab-pane>
       </a-tabs>
     </div>
   </CustomDrawer>
@@ -104,6 +113,7 @@ import RackView from './rackView/index.vue'
 import RackGroupAttr from './rackGroupAttr/index.vue'
 import DeviceList from './deviceList/index.vue'
 import OperationLog from './operationLog/index.vue'
+import RackImages from './rackImages/index.vue'
 
 export default {
   name: 'RackDetail',
@@ -111,7 +121,8 @@ export default {
     RackView,
     RackGroupAttr,
     DeviceList,
-    OperationLog
+    OperationLog,
+    RackImages
   },
   props: {
     roomId: {

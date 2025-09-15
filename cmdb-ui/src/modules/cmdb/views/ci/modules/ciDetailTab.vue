@@ -48,7 +48,6 @@
                           :ci="ci"
                           :attr="attr"
                           :attributeGroups="attributeGroups"
-                          @updateChoiceValue="updateChoiceValue"
                           @refresh="refresh"
                           @updateCIByself="updateCIByself"
                           @refreshReferenceAttr="handleReferenceAttr"
@@ -168,6 +167,15 @@
           <RelatedItsmTable ref="relatedITSMTable" :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" :attrList="attrList" />
         </div>
       </a-tab-pane>
+      <a-tab-pane key="tab_6">
+        <span slot="tab"><a-icon type="picture" />设备图片</span>
+        <CiDetailImage
+          :ci="ci"
+          :ciId="ciId"
+          :typeId="typeId"
+          :attributeGroups="attributeGroups"
+        />
+      </a-tab-pane>
     </a-tabs>
     <a-empty
       v-else
@@ -198,6 +206,7 @@ import CIDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
 import CIRollbackForm from './ciRollbackForm.vue'
+import CiDetailImage from './ciDetailImage.vue'
 
 export default {
   name: 'CiDetailTab',
@@ -210,7 +219,8 @@ export default {
     CIRollbackForm,
     CIDetailTitle,
     CIDetailTableTitle,
-    CIRelationTable
+    CIRelationTable,
+    CiDetailImage
   },
   props: {
     typeId: {

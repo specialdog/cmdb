@@ -602,18 +602,18 @@ const cmdb_en = {
         pluginScript: `# -*- coding:utf-8 -*-
 
 import json
-        
-        
+
+
 class AutoDiscovery(object):
-        
+
     @property
     def unique_key(self):
         """
-        
+
         :return: Returns the name of a unique attribute
         """
         return
-        
+
     @staticmethod
     def attributes():
         """
@@ -627,19 +627,19 @@ class AutoDiscovery(object):
         ]
         """
         return []
-        
+
     @staticmethod
     def run():
         """
         Execution entry, returns collected attribute values
-        :return: 
+        :return:
         Returns a list, the list item is a dictionary, the dictionary key is the attribute name, and the value is the attribute value
         For example:
         return [dict(ci_type="server", private_ip="192.168.1.1")]
         """
         return []
-        
-        
+
+
 if __name__ == "__main__":
     result = AutoDiscovery().run()
     if isinstance(result, list):
@@ -929,7 +929,10 @@ if __name__ == "__main__":
         calcUnitFreeCount: 'Calculate Rack Free Unit Count',
         calcUnitFreeCountTip: 'Calculating in the background, refresh the page later to see the result',
         calcUnitFreeCountTip1: 'Calculate Trigger Success, refresh the page later to see the result',
-        calcUnitFreeCountTip2: `Confirm that you want to calculate the number of free Units for all rack?`
+        calcUnitFreeCountTip2: `Confirm that you want to calculate the number of free Units for all rack?`,
+        rackImages: 'rack images',
+        uploadImages: 'upload images',
+        uploadedImages: 'uploaded images'
     }
 }
 export default cmdb_en

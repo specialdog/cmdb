@@ -59,3 +59,28 @@ export function getCIAdcStatistics() {
     method: 'GET'
   })
 }
+
+export function getCIImage(imgUrl, parameter) {
+  return axios({
+    url: imgUrl,
+    method: 'GET',
+    params: parameter
+  })
+}
+
+export function deleteCIImage(imgUrl, data) {
+  return axios({
+    url: imgUrl,
+    method: 'DELETE',
+    data
+  })
+}
+
+export function uploadCIImage(imgUrl, data) {
+  return axios({
+    url: imgUrl,
+    method: 'POST',
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data
+  })
+}

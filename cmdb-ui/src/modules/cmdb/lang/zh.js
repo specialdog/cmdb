@@ -601,18 +601,18 @@ const cmdb_zh = {
         pluginScript: `# -*- coding:utf-8 -*-
 
 import json
-        
-        
+
+
 class AutoDiscovery(object):
-        
+
     @property
     def unique_key(self):
         """
-        
+
         :return: Returns the name of a unique attribute
         """
         return
-        
+
     @staticmethod
     def attributes():
         """
@@ -626,19 +626,19 @@ class AutoDiscovery(object):
         ]
         """
         return []
-        
+
     @staticmethod
     def run():
         """
         Execution entry, returns collected attribute values
-        :return: 
+        :return:
         Returns a list, the list item is a dictionary, the dictionary key is the attribute name, and the value is the attribute value
         For example:
         return [dict(ci_type="server", private_ip="192.168.1.1")]
         """
         return []
-        
-        
+
+
 if __name__ == "__main__":
     result = AutoDiscovery().run()
     if isinstance(result, list):
@@ -928,7 +928,10 @@ if __name__ == "__main__":
         calcUnitFreeCount: '计算机架空闲U数',
         calcUnitFreeCountTip: '后台计算中，稍后刷新页面查看结果',
         calcUnitFreeCountTip1: '计算触发成功，稍后刷新页面查看结果',
-        calcUnitFreeCountTip2: '确认要计算所有机架的空闲U数？'
+        calcUnitFreeCountTip2: '确认要计算所有机架的空闲U数？',
+        rackImages: '机架图片',
+        uploadImages: '上传图片',
+        uploadedImages: '已上传图片'
     }
 }
 export default cmdb_zh

@@ -91,3 +91,30 @@ export function calcUnitFreeCount() {
     method: 'POST'
   })
 }
+
+// 获取机架图片列表
+export function getRackImages(rootId) {
+  return axios({
+    url: `/v0.1/dcim/${rootId}/rackimg`,
+    method: 'GET'
+  })
+}
+
+// 上传机架图片
+export function uploadRackImage(rootId, data) {
+  return axios({
+    url: `/v0.1/dcim/${rootId}/rackimg`,
+    method: 'POST',
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data
+  })
+}
+
+// 删除机架图片
+export function deleteRackImage(rootId, data) {
+  return axios({
+    url: `/v0.1/dcim/${rootId}/rackimg`,
+    method: 'DELETE',
+    data
+  })
+}

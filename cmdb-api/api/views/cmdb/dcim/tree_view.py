@@ -11,8 +11,6 @@ app_cli = CMDBApp()
 class DCIMTreeView(APIView):
     url_prefix = "/dcim/tree_view"
 
-    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.DCIM,
-                         app_cli.op.read, app_cli.admin_name)
     def get(self):
         result, type2name = TreeViewManager.get()
 

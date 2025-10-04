@@ -16,8 +16,6 @@ app_cli = CMDBApp()
 class DCIMOperateHistoryView(APIView):
     url_prefix = ("/dcim/history/operate",)
 
-    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.DCIM,
-                         app_cli.op.read, app_cli.admin_name)
     def get(self):
         page = get_page(request.values.pop("page", 1))
         page_size = get_page_size(request.values.pop("page_size", None))

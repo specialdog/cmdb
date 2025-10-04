@@ -10,6 +10,7 @@ from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.resource import APIView
 from api.tasks.cmdb import dcim_calc_u_free_count
+from api.models.dcim import DcimRackLayout
 
 app_cli = CMDBApp()
 
@@ -36,6 +37,23 @@ class RackView(APIView):
                          app_cli.op.read, app_cli.admin_name)
     def delete(self, _id):
         RackManager().delete(_id)
+
+        data = request.get_json()
+        layout_name = data.get('layoutName', '')
+        rack_name = data.get('rackName', '')
+        if not layout_name or not rack_name:
+            return self.jsonify(ci_id=_id)
+        layout = DcimRackLayout.get_by(layout_name=layout_name, first=True, to_dict=False)
+        if layout and layout.layoutData:
+            layout_data = layout.layoutData
+            rack_positions = layout_data.get('rackPositions')
+            if rack_positions:
+                delete_index = -1
+                for index, item in enumerate(rack_positions):
+                    if item.get('rackName') == rack_name:
+                        delete_index = index
+                rack_positions.pop(delete_index)
+                layout.update(layout_name=layout_name, layout_data=layout_data)
 
         return self.jsonify(ci_id=_id)
 

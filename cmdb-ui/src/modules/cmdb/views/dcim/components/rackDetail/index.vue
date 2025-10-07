@@ -228,11 +228,12 @@ export default {
     },
 
     clickDelete() {
+      const reqData = { roomId: this.roomId, rackName: this.rackData.name }
       this.$confirm({
         title: this.$t('warning'),
         content: this.$t('confirmDelete'),
         onOk: () => {
-          deleteDCIM(DCIM_TYPE.RACK, this.rackId).then(() => {
+          deleteDCIM(DCIM_TYPE.RACK, this.rackId, reqData).then(() => {
             this.$message.success(this.$t('deleteSuccess'))
             this.handleClose()
             this.getRackList()

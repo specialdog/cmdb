@@ -1,7 +1,7 @@
 <template>
   <div class="dcim-main" ref="rackMainRef">
     <div v-if="!roomId" class="dcim-main-null">
-      <img class="dcim-main-null-img" :src="require(`@/modules/cmdb/assets/dcim/dcim_null.png`)"></img>
+      <img class="dcim-main-null-img" :src="require(`@/modules/cmdb/assets/dcim/dcim_null.png`)">
       <div class="dcim-main-null-tip">{{ $t('noData') }}</div>
       <div class="dcim-main-null-tip2">{{ $t('cmdb.dcim.roomNullTip') }}</div>
     </div>
@@ -64,6 +64,7 @@
         <RackGrid
           v-if="currentLayout === 'grid'"
           :rackList="filterRackList"
+          :roomId="roomId"
           @openRackDetail="openRackDetail"
         />
 
@@ -370,7 +371,7 @@ export default {
     margin-top: 22px;
     margin-bottom: 22px;
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
   }
 }
 </style>

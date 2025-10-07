@@ -31,10 +31,11 @@ export function putDCIM(type, id, data) {
   })
 }
 
-export function deleteDCIM(type, id) {
+export function deleteDCIM(type, id, data = {}) {
   return axios({
     url: `/v0.1/dcim/${type}/${id}`,
     method: 'DELETE',
+    data
   })
 }
 
@@ -115,6 +116,22 @@ export function deleteRackImage(rootId, data) {
   return axios({
     url: `/v0.1/dcim/${rootId}/rackimg`,
     method: 'DELETE',
+    data
+  })
+}
+
+export function loadLayout(params) {
+  return axios({
+    url: '/v0.1/dcim/layout',
+    method: 'GET',
+    params
+  })
+}
+
+export function saveLayout(data) {
+  return axios({
+    url: '/v0.1/dcim/layout',
+    method: 'POST',
     data
   })
 }

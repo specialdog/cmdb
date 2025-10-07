@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from flask import request
+from flask import request, current_app
 
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.dcim.const import RackBuiltinAttributes
@@ -44,8 +44,8 @@ class RackView(APIView):
         if not layout_name or not rack_name:
             return self.jsonify(ci_id=_id)
         layout = DcimRackLayout.get_by(layout_name=layout_name, first=True, to_dict=False)
-        if layout and layout.layoutData:
-            layout_data = layout.layoutData
+        if layout and layout.layout_data:
+            layout_data = layout.layout_data
             rack_positions = layout_data.get('rackPositions')
             if rack_positions:
                 delete_index = -1
@@ -53,6 +53,7 @@ class RackView(APIView):
                     if item.get('rackName') == rack_name:
                         delete_index = index
                 rack_positions.pop(delete_index)
+                current_app.logger.info(layout_data)
                 layout.update(layout_name=layout_name, layout_data=layout_data)
 
         return self.jsonify(ci_id=_id)

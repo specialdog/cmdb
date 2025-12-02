@@ -10,10 +10,12 @@ export const ruleTypeList = () => {
 
 export const expList = () => {
     return [
-        { value: 'is', label: i18n.t('cmdbFilterComp.is') },
-        { value: '~is', label: i18n.t('cmdbFilterComp.~is') },
         { value: 'contain', label: i18n.t('cmdbFilterComp.contain') },
         { value: '~contain', label: i18n.t('cmdbFilterComp.~contain') },
+        { value: 'is', label: i18n.t('cmdbFilterComp.is') },
+        { value: '~is', label: i18n.t('cmdbFilterComp.~is') },
+        { value: 'empty', label: i18n.t('cmdbFilterComp.empty') },
+        { value: '~empty', label: i18n.t('cmdbFilterComp.~empty') },
         { value: 'start_with', label: i18n.t('cmdbFilterComp.start_with') },
         { value: '~start_with', label: i18n.t('cmdbFilterComp.~start_with') },
         { value: 'end_with', label: i18n.t('cmdbFilterComp.end_with') },

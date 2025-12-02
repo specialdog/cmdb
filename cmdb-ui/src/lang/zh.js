@@ -145,15 +145,18 @@ export default {
         '~start_with': '不以...开始',
         end_with: '以...结束',
         '~end_with': '不以...结束',
-        '~value': '为空',
-        value: '不为空',
+        '~value': '为null',
+        value: '不为null',
         in: 'in查询',
         '~in': '非in查询',
         range: '范围',
         '~range': '范围外',
         compare: '比较',
         addHere: '在此处添加',
-        split: '以 {separator} 分隔'
+        split: '以 {separator} 分隔',
+        empty: '为空值(NULL或空字符串)',
+        '~empty': '不为空值',
+        emptyValueTip: '自动查询空值，无需输入'
     },
     customIconSelect: {
         outlined: '线框',

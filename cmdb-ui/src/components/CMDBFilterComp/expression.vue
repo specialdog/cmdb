@@ -208,7 +208,7 @@
         <a-input class="ops-input" v-model="item.value" size="small" style="width: 113px" />
       </a-input-group>
       <a-input
-        v-else-if="item.exp !== 'value' && item.exp !== '~value'"
+        v-else-if="item.exp !== 'value' && item.exp !== '~value' && item.exp !== 'empty' && item.exp !== '~empty'"
         size="small"
         v-model="item.value"
         :placeholder="item.exp === 'in' || item.exp === '~in' ? $t('cmdbFilterComp.split', { separator: ';' }) : ''"
@@ -216,6 +216,13 @@
         :style="{ width: '175px' }"
         :disabled="disabled"
       ></a-input>
+      <!-- 空值选项显示提示文本 -->
+      <span
+        v-else-if="item.exp === 'empty' || item.exp === '~empty'"
+        style="width: 175px; height: 24px; line-height: 24px; padding: 0 8px; background: #f5f5f5; border-radius: 4px; color: #999; font-size: 12px; display: inline-block;"
+      >
+        {{ $t('cmdbFilterComp.emptyValueTip') }}
+      </span>
       <div v-else :style="{ width: '175px' }"></div>
       <template v-if="!disabled">
         <a-tooltip :title="$t('copy')">
@@ -321,7 +328,7 @@ export default {
         id: uuidv4(),
         type: 'and',
         property: this.canSearchPreferenceAttrList[0]?.name,
-        exp: 'is',
+        exp: 'contain',
         value: null,
       })
       this.$emit('change', this.ruleList)
@@ -344,7 +351,7 @@ export default {
           id: uuidv4(),
           type: 'and',
           property: this.canSearchPreferenceAttrList[0]?.name,
-          exp: 'is',
+          exp: 'contain',
           value: null,
         })
       }
@@ -378,6 +385,13 @@ export default {
           ..._ruleList[index],
           compareType: '1',
           exp: value,
+        }
+      } else if (value === 'empty' || value === '~empty') {
+        // 空值选项不需要用户输入值
+        _ruleList[index] = {
+          ..._ruleList[index],
+          exp: value,
+          value: '',
         }
       } else {
         _ruleList[index] = {

@@ -181,7 +181,7 @@ export default {
                   _canSearchPreferenceAttrList && _canSearchPreferenceAttrList.length
                     ? _canSearchPreferenceAttrList[0].name
                     : undefined,
-                exp: 'is',
+                exp: 'contain',
                 value: null,
               },
             ]
@@ -194,7 +194,7 @@ export default {
           id: uuidv4(),
           type: 'and',
           property: this.canSearchPreferenceAttrList[0].name,
-          exp: 'is',
+          exp: 'contain',
           value: null,
         },
       ]
@@ -241,6 +241,16 @@ export default {
           if (_exp === 'compare') {
             const idx = compareTypeList.findIndex((item) => item.value === rule.compareType)
             singleRuleExp += `${compareTypeList[idx].label}${rule.value ?? ''}`
+          }
+          if (rule.exp === 'empty') {
+            // q=service_ip:,-~service_ip:*
+            const emptyStringQuery = `,-~${rule.property}:*`
+            singleRuleExp += emptyStringQuery
+          }
+          // q=service_ip:*,~service_ip:
+          if (rule.exp === '~empty') {
+            const notEmptyQuery = `,${rule.property}:*`
+            singleRuleExp += notEmptyQuery
           }
           return singleRuleExp
         })

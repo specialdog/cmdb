@@ -57,12 +57,22 @@
             </div>
           </div>
 
+          <!-- 如果是空调或柱子，显示名称文字 -->
+          <div
+            v-if="item.name.includes('空调') || item.name.includes('柱子')"
+            class="rack-grid-item-text"
+          >
+            {{ item.name.replace(/\d+$/, '') }}
+          </div>
+
+          <!-- 否则显示机柜图片 -->
           <img
+            v-else
             class="rack-grid-item-img"
             :src="require(`@/modules/cmdb/assets/dcim/rack.png`)"
           />
 
-          <div class="rack-grid-item-data">
+          <div v-if="!item.name.includes('空调') && !item.name.includes('柱子')" class="rack-grid-item-data">
             <ops-icon
               type="a-veops-device2"
               class="rack-grid-item-data-icon"
@@ -189,9 +199,9 @@ export default {
         maxY = rows * 120
       }
 
-      // 放大到1.5倍，添加边距
-      const containerWidth = Math.max(maxX * 1.5, 800)
-      const containerHeight = Math.max(maxY * 1.5, 400)
+      // 放大到1.2倍，添加边距
+      const containerWidth = Math.max(maxX * 1.2, 800)
+      const containerHeight = Math.max(maxY * 1.2, 400)
 
       return {
         width: `${containerWidth}px`,
@@ -362,8 +372,6 @@ export default {
   overflow: auto;
   padding: 20px;
   background: #f5f5f5;
-  transform: scale(0.75);
-  transform-origin: top left;
 
   // 添加网格背景辅助线
   background-image:
@@ -487,6 +495,19 @@ export default {
       transition: all 0.2s;
     }
 
+    &-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      font-size: 24px;
+      font-weight: 700;
+      color: #4E5969;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+
     &-data {
       margin-top: 8px;  // 缩小间距
       display: flex;
@@ -578,6 +599,10 @@ export default {
       .rack-grid-item-img {
         margin-top: 4px;
         height: 64px;  // 缩小hover图片
+      }
+
+      .rack-grid-item-text {
+        font-size: 28px;  // Hover 时字体变大
       }
 
       .rack-grid-item-data {

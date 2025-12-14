@@ -38,15 +38,13 @@ class DeviceImageView(APIView):
             if not ci_type:
                 return abort(404, ErrFormat.ci_type_not_found)
 
-            server_room = request.args.get('server_room')
-            rack = request.args.get('rack')
-            sn = request.args.get('sn')
+            server_id = request.args.get('server_id')
 
-            if not all([server_room, rack, sn]):
-                return abort(400, "server_room, rack, sn 参数都是必需的")
+            if not server_id:
+                return abort(400, "server_id 参数是必需的")
 
-            image_dir = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), server_room, rack, sn)
-            img_info = self.get_img_info(image_dir, sn, DEV_BASE_IMAGE_PATH, find_all=True)
+            image_dir = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), server_id)
+            img_info = self.get_img_info(image_dir)
         else:
             if not rack_id:
                 return abort(400, "rack ID是必需的")
@@ -56,7 +54,7 @@ class DeviceImageView(APIView):
         return img_info
 
 
-    def get_img_info(self, image_dir, partial_name=None, base_path=None, find_all=False):
+    def get_img_info(self, image_dir):
         """
         参数:
             image_dir: 图片路径
@@ -64,10 +62,6 @@ class DeviceImageView(APIView):
         返回:
             list [图片信息]
         """
-        if not os.path.exists(image_dir) and find_all:
-            if self.find_folders_with_partial_name(partial_name, base_path):
-                return self.jsonify(images=[], count=0, message="图片存在, 但路径错误!")
-            return self.jsonify(images=[], count=0, message="目录不存在!")
 
         try:
             # 获取目录下所有图片文件
@@ -167,13 +161,11 @@ class DeviceImageView(APIView):
 
             # 获取请求参数
             params = request.get_json() if request.is_json else request.form.to_dict()
-            server_room = params.get('server_room')
-            rack = params.get('rack')
-            sn = params.get('sn')
-            if not all([server_room, rack, sn]):
-                return abort(400, "server_room, rack, sn 参数都是必需的")
+            server_id = params.get('server_id')
+            if not server_id:
+                return abort(400, "server_id 参数是必需的")
             # 构建存储目录路径
-            image_dir = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), server_room, rack, sn)
+            image_dir = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), server_id)
         else:
             image_dir = os.path.join(RACK_BASE_IMAGE_PATH, str(rack_id))
 
@@ -233,11 +225,9 @@ class DeviceImageView(APIView):
                 return abort(404, ErrFormat.ci_type_not_found)
             # 获取请求参数
             params = request.get_json() if request.is_json else request.form.to_dict()
-            server_room = params.get('server_room')
-            rack = params.get('rack')
-            sn = params.get('sn')
+            server_id = params.get('server_id')
             filename = params.get('filename')
-            file_path = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), server_room, rack, sn, filename)
+            file_path = os.path.join(DEV_BASE_IMAGE_PATH, str(ci_type_id), str(server_id), filename)
 
         else:
             params = request.get_json() if request.is_json else request.form.to_dict()

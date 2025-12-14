@@ -141,10 +141,7 @@ export default {
       const formData = new FormData()
       formData.append('file', file)
       // 添加设备信息
-      const hardwareInfo = this.getHardwareInfo()
-      formData.append('server_room', hardwareInfo.server_room || '')
-      formData.append('rack', hardwareInfo.rack || '')
-      formData.append('sn', hardwareInfo.sn || '')
+      formData.append('server_id', this.ci['server_id'])
       uploadCIImage(this.uploadUrl, formData).then(response => {
         onSuccess(response, file)
         message.success('上传成功')
@@ -167,7 +164,7 @@ export default {
     // 加载设备已有图片
     async loadDeviceImages() {
       try {
-        const response = await getCIImage(this.uploadUrl, this.getHardwareInfo())
+        const response = await getCIImage(this.uploadUrl, { server_id: this.ci['server_id'] })
         this.fileList = (response.images || []).map((item, index) => ({
           uid: item.id || index,
           name: item.filename || `image_${index}`,
@@ -193,16 +190,6 @@ export default {
         return false
       }
 
-      // 检查必要的信息是否存在
-      const hardwareInfo = this.getHardwareInfo()
-      const keyInfo = ['server_room', 'rack', 'sn']
-      keyInfo.forEach(item => {
-        if (!hardwareInfo[item]) {
-            message.error(`缺少设备${item}信息, 无法上传图片!`)
-            return false
-        }
-      })
-
       return true
     },
 
@@ -220,7 +207,7 @@ export default {
     // 删除图片
     handleRemove(file) {
       try {
-        const deleteFileData = Object.assign({}, this.getHardwareInfo(), { 'filename': file.name })
+        const deleteFileData = Object.assign({}, { server_id: this.ci['server_id'] }, { 'filename': file.name })
         deleteCIImage(this.uploadUrl, deleteFileData).then(response => {
           this.loadDeviceImages()
           message.success('图片删除成功')

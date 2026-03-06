@@ -1,46 +1,53 @@
 <template>
   <div class="reference-attr-select-wrap">
-    <a-select
-      v-bind="$attrs"
-      v-model="selectCIIds"
-      optionFilterProp="title"
-      :mode="isList ? 'multiple' : 'default'"
-      showSearch
-      allowClear
-      :getPopupContainer="(trigger) => trigger.parentElement"
-      class="reference-attr-select"
-      :maxTagCount="2"
-      @dropdownVisibleChange="handleDropdownVisibleChange"
-      @search="handleSearch"
-      @change="handleChange"
-    >
-      <template v-if="!isInit">
-        <a-select-option
-          v-for="(item) in initSelectOption"
-          :key="item.key"
-          :title="item.title"
-        >
-          {{ item.title }}
-        </a-select-option>
-      </template>
-      <a-select-option
-        v-for="(item) in options"
-        :key="item.key"
-        :title="item.title"
+    <!-- 弹窗模式 -->
+    <template>
+      <a-popover
+        v-model="popoverVisible"
+        trigger="click"
+        placement="bottom"
+        overlayClassName="ci-reference-popover"
+        :getPopupContainer="trigger => trigger.parentElement"
       >
-        {{ item.title }}
-      </a-select-option>
-    </a-select>
+        <div slot="content" @click.stop @mousedown.stop>
+          <CIReferenceSelect
+            slot="content"
+            :value="selectCIIds"
+            :isList="isList"
+            :referenceShowAttrName="referenceShowAttrName"
+            :referenceTypeId="referenceTypeId"
+            @change="handleModalChange"
+            @cancel="handleModalCancel"/>
+        </div>
+
+        <div class="reference-attr-modal-trigger">
+          <span v-if="displayText" class="reference-attr-modal-text">
+            {{ displayText }}
+          </span>
+          <span v-else class="reference-attr-modal-placeholder">
+            {{ $t('placeholder2') }}
+          </span>
+          <a-icon
+            v-if="allowClear && selectCIIds && (isList ? selectCIIds.length : true)"
+            type="close-circle"
+            class="reference-attr-modal-clear"
+            @click.stop="handleClear"
+          />
+        </div>
+      </a-popover>
+    </template>
   </div>
 </template>
 
 <script>
-import _ from 'lodash'
-import debounce from 'lodash/debounce'
 import { searchCI, getCIType } from '@/api/cmdb'
+import CIReferenceSelect from './ciReferenceSelect.vue'
 
 export default {
   name: 'CIReferenceAttr',
+  components: {
+    CIReferenceSelect
+  },
   props: {
     value: {
       type: [Number, String, Array],
@@ -61,6 +68,10 @@ export default {
     initSelectOption: {
       type: Array,
       default: () => []
+    },
+    allowClear: {
+      type: Boolean,
+      default: true
     }
   },
   model: {
@@ -71,16 +82,10 @@ export default {
     return {
       isInit: false,
       options: [],
-      innerReferenceShowAttrName: ''
-    }
-  },
-  watch: {
-    referenceTypeId: {
-      immediate: true,
-      deep: true,
-      handler() {
-        this.isInit = false
-      }
+      innerReferenceShowAttrName: '',
+      popoverVisible: false,
+      // 用于弹窗模式的显示名称映射 { id: name }
+      selectedItemsMap: {}
     }
   },
   computed: {
@@ -97,67 +102,107 @@ export default {
         return val
       },
     },
+    // 弹窗触发器显示文本
+    displayText() {
+      if (this.isList) {
+        const ids = this.selectCIIds || []
+        if (!ids.length) return ''
+
+        // 显示前2个 + 剩余数量
+        const names = ids.slice(0, 2).map(id => this.selectedItemsMap[id] || id)
+        const text = names.join(', ')
+        return ids.length > 2 ? `${text} +${ids.length - 2}` : text
+      }
+      return this.selectedItemsMap[this.selectCIIds] || ''
+    }
+  },
+  watch: {
+    selectCIIds: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.loadDisplayNames()
+        }
+      }
+    }
   },
   methods: {
-    async handleDropdownVisibleChange(open) {
-      if (!this.isInit && open && this.referenceTypeId) {
-        this.isInit = true
+    // 弹窗模式的变更处理
+    handleModalChange(data) {
+      if (this.isList) {
+        // 多选模式
+        const { values, items } = data
 
-        if (!this.referenceShowAttrName) {
-          const res = await getCIType(this.referenceTypeId)
-          const ciType = res?.ci_types?.[0]
-          this.innerReferenceShowAttrName = ciType?.show_name || ciType?.unique_name || ''
-        }
-
-        const attrName = this.referenceShowAttrName || this.innerReferenceShowAttrName || ''
-        if (!attrName) {
-          return
-        }
-
-        const res = await searchCI({
-          q: `_type:${this.referenceTypeId}`,
-          fl: attrName,
-          count: 25,
+        // 更新显示名称映射
+        items.forEach(item => {
+          this.selectedItemsMap[item.key] = item.title
         })
 
-        let options = res?.result?.map((item) => {
-          return {
-            key: item._id,
-            title: String(item?.[attrName] ?? '')
-          }
-        })
+        // 触发变更
+        this.$emit('change', values || [])
 
-        options = _.uniqBy([...this.initSelectOption, ...options], 'key')
+        // 关闭弹窗
+        this.popoverVisible = false
+      } else {
+        // 单选模式
+        const { value, title } = data
 
-        this.options = options
+        // 更新显示名称映射
+        this.selectedItemsMap[value] = title
+
+        // 触发变更
+        this.$emit('change', value)
+
+        // 关闭弹窗
+        this.popoverVisible = false
       }
     },
 
-    handleSearch: debounce(async function(v) {
-      const attrName = this.referenceShowAttrName || this.innerReferenceShowAttrName || ''
+    // 取消弹窗
+    handleModalCancel() {
+      this.popoverVisible = false
+    },
 
-      if (!attrName || !this.referenceTypeId) {
+    // 清空选择
+    handleClear() {
+      this.$emit('change', this.isList ? [] : null)
+      this.selectedItemsMap = {}
+    },
+
+    // 加载显示名称（用于弹窗触发器显示）
+    async loadDisplayNames() {
+      if (!this.selectCIIds || (Array.isArray(this.selectCIIds) && !this.selectCIIds.length)) {
+        this.selectedItemsMap = {}
         return
       }
 
-      const res = await searchCI({
-        q: `_type:${this.referenceTypeId}${v ? ',*' + v + '*' : ''}`,
-        fl: attrName,
-        count: v ? 100 : 25,
-      })
+      // 如果已经有映射，跳过加载
+      const ids = Array.isArray(this.selectCIIds) ? this.selectCIIds : [this.selectCIIds]
+      const needLoad = ids.filter(id => !this.selectedItemsMap[id])
 
-      this.options = res?.result?.map((item) => {
-        return {
-          key: item._id,
-          title: String(item?.[attrName] ?? '')
-        }
-      })
-    }, 300),
+      if (!needLoad.length) return
 
-    handleChange(v) {
-      if (Array.isArray(v) ? !v.length : !v) {
-        this.handleSearch()
+      const attrName = this.referenceShowAttrName || this.innerReferenceShowAttrName
+
+      if (!attrName) {
+        // 如果还没有属性名，先获取
+        const res = await getCIType(this.referenceTypeId)
+        const ciType = res?.ci_types?.[0]
+        this.innerReferenceShowAttrName = ciType?.show_name || ciType?.unique_name || ''
       }
+
+      const finalAttrName = this.referenceShowAttrName || this.innerReferenceShowAttrName
+      if (!finalAttrName) return
+
+      const res = await searchCI({
+        q: `_id:(${needLoad.join(',')})`,
+        fl: finalAttrName,
+        count: needLoad.length
+      })
+
+      res.result.forEach(item => {
+        this.selectedItemsMap[item._id] = String(item?.[finalAttrName] ?? '')
+      })
     }
   }
 }
@@ -173,6 +218,48 @@ export default {
     /deep/ .ant-select-dropdown {
       z-index: 15;
     }
+  }
+
+  .reference-attr-modal-trigger {
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    line-height: 30px;
+    min-height: 32px;
+    padding: 0 11px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: #40a9ff;
+    }
+
+    .reference-attr-modal-text {
+      color: rgba(0, 0, 0, 0.65);
+    }
+
+    .reference-attr-modal-placeholder {
+      color: #bfbfbf;
+    }
+
+    .reference-attr-modal-clear {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(0, 0, 0, 0.25);
+      font-size: 12px;
+
+      &:hover {
+        color: rgba(0, 0, 0, 0.45);
+      }
+    }
+  }
+}
+
+/deep/ .ci-reference-popover {
+  .ant-popover-inner-content {
+    padding: 12px;
   }
 }
 </style>

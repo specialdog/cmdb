@@ -127,7 +127,7 @@ class RackManager(DCIMBase):
 
             self.add_relation(rack_id, device_id)
 
-            payload = {RackBuiltinAttributes.U_START: u_start}
+            payload = {RackBuiltinAttributes.U_START: u_start, RackBuiltinAttributes.OFFLINE: False}
             if u_count:
                 payload[RackBuiltinAttributes.U_COUNT] = u_count
             CIManager().update(device_id, _sync=True, **payload)
@@ -138,17 +138,17 @@ class RackManager(DCIMBase):
 
         OperateHistoryManager().add(operate_type=OperateTypeEnum.ADD_DEVICE, rack_id=rack_id, ci_id=device_id)
 
-    def remove_device(self, rack_id, device_id):
+    def remove_device(self, rack_id, device_id, reason):
         with (redis_lock.Lock(rd.r, "DCIM_RACK_OPERATE_{}".format(rack_id), expire=10)):
             CIRelationManager.delete_3(rack_id, device_id, apply_async=False, valid=False)
 
             payload = {RackBuiltinAttributes.FREE_U_COUNT: self.calc_u_free_count(rack_id)}
             CIManager().update(rack_id, _sync=True, **payload)
 
-            payload = {RackBuiltinAttributes.U_START: None}
+            payload = {RackBuiltinAttributes.U_START: None, RackBuiltinAttributes.OFFLINE: True}
             CIManager().update(device_id, _sync=True, **payload)
 
-        OperateHistoryManager().add(operate_type=OperateTypeEnum.REMOVE_DEVICE, rack_id=rack_id, ci_id=device_id)
+        OperateHistoryManager().add(operate_type=OperateTypeEnum.REMOVE_DEVICE, rack_id=rack_id, ci_id=device_id, reason=reason)
 
     def move_device(self, rack_id, device_id, to_u_start):
         with (redis_lock.Lock(rd.r, "DCIM_RACK_OPERATE_{}".format(rack_id), expire=10)):

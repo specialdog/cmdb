@@ -9,6 +9,7 @@ class RackBuiltinAttributes(BaseEnum):
     U_START = 'u_start'
     FREE_U_COUNT = 'free_u_count'
     U_SLOT_ABNORMAL = 'u_slot_abnormal'
+    OFFLINE = 'offline'
 
 
 class OperateTypeEnum(BaseEnum):

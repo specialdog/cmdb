@@ -9,12 +9,7 @@
           :key="group.key"
           class="tab-group"
         >
-          <div
-            v-if="group.name"
-            class="tab-group-name"
-          >
-            {{ group.name }}
-          </div>
+
           <div
             v-for="(item) in group.list"
             :key="item.key"

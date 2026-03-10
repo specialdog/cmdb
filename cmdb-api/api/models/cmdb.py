@@ -718,3 +718,4 @@ class DCIMOperationHistory(Model2):
     rack_id = db.Column(db.Integer, index=True)
     ci_id = db.Column(db.Integer, index=True)
     operate_type = db.Column(db.Enum(*OperateTypeEnum.all()))
+    reason = db.Column(db.Text)

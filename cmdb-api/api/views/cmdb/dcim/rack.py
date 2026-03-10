@@ -86,7 +86,8 @@ class RackDetailView(APIView):
     @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.DCIM,
                          app_cli.op.read, app_cli.admin_name)
     def delete(self, rack_id, device_id):
-        RackManager().remove_device(rack_id, device_id)
+        reason = request.get_json().get('reason', '')
+        RackManager().remove_device(rack_id, device_id, reason)
 
         return self.jsonify(code=200)
 

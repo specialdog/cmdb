@@ -9,6 +9,7 @@
       ref="xTable"
       size="small"
       :data="data"
+      :row-class-name="getRowClassName"
       :loading="loading"
       :row-config="{ useKey: true, keyField: '_id' }"
       show-header-overflow
@@ -342,6 +343,13 @@ export default {
   },
 
   methods: {
+    getRowClassName({ row }) {
+      // 👇 安全的判断方式
+      if (row && row.offline) {
+        return 'row-device-offline'
+      }
+      return ''
+    },
     getVxetableRef() {
       return this?.$refs?.['xTable']?.getVxetableRef?.() || null
     },
@@ -533,6 +541,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+::v-deep .row-device-offline {
+  text-decoration: line-through;
+  color: #F00;
+  background-color: #fafafa;
+}
 .ci-table-wrap {
   .ci-table-loading {
     width: 100%;

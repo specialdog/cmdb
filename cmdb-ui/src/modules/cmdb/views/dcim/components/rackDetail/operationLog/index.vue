@@ -37,13 +37,28 @@
         </template>
       </vxe-table-column>
       <vxe-table-column
-        :title="$t('cmdb.dcim.deviceType')"
+        :title="'ID'"
         field="deviceType"
       ></vxe-table-column>
       <vxe-table-column
         :title="$t('cmdb.dcim.deviceName')"
         field="deviceName"
       ></vxe-table-column>
+      <vxe-table-column
+        :title="$t('cmdb.dcim.operationInfo')"
+        field="reason"
+        min-width="200"
+      >
+        <template #default="{ row }">
+          <a-tooltip v-if="row.reason" placement="topLeft">
+            <template slot="title">
+              {{ row.reason }}
+            </template>
+            <span class="operation-log-reason">{{ row.reason }}</span>
+          </a-tooltip>
+          <span v-else class="operation-log-reason-empty">-</span>
+        </template>
+      </vxe-table-column>
     </ops-table>
 
     <div class="operation-log-pagination">
@@ -145,9 +160,10 @@ export default {
         const user = this.allEmployees.find((emp) => item.uid === emp.acl_uid)
 
         item.operationUser = user?.nickname || ''
-        item.deviceType = ci?.ci_type_alias || ''
+        item.deviceType = ci?.[ci.unique] || ''
         item.deviceName = ci?.[showKey] || item?.ci_id || ''
         item.deviceTypeData = this.deviceTypeMap?.[item?.operate_type] || {}
+        item.reason = item.reason || ''
       })
 
       this.tableData = tableData
@@ -190,6 +206,19 @@ export default {
   &-pagination {
     text-align: right;
     margin-top: 4px;
+  }
+
+  &-reason {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+  }
+
+  &-reason-empty {
+    color: #ccc;
   }
 }
 </style>

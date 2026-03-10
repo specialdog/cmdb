@@ -156,6 +156,10 @@
       ref="abnormalModalRef"
       @ok="editDevice"
     />
+    <DeleteDeviceModal
+      ref="deleteDeviceModalRef"
+      @ok="handleDeleteDevice"
+    />
   </div>
 </template>
 
@@ -167,6 +171,7 @@ import RackHeader from './rackHeader/index.vue'
 import draggable from 'vuedraggable'
 import CIIcon from '@/modules/cmdb/components/ciIcon/index.vue'
 import AbnormalModal from './abnormalModal.vue'
+import DeleteDeviceModal from './deleteDeviceModal.vue'
 
 export default {
   name: 'RackUnitView',
@@ -174,7 +179,8 @@ export default {
     RackHeader,
     draggable,
     CIIcon,
-    AbnormalModal
+    AbnormalModal,
+    DeleteDeviceModal
   },
   props: {
     viewType: {
@@ -276,24 +282,20 @@ export default {
       }
     },
 
-    removeDevice(data) {
-      const content = this.$t('cmdb.dcim.removeDeviceTip', {
-        deviceName: `${data.CITypeName} ${data.name}`
-      })
+    removeDevice(item) {
+      this.$refs.deleteDeviceModalRef.open(item)
+    },
 
-      this.$confirm({
-        title: this.$t('warning'),
-        content,
-        onOk: () => {
-          deleteDevice(
-            this.rackId,
-            data.id
-          ).then(() => {
-            this.$message.success(this.$t('deleteSuccess'))
-            this.$emit('refreshRackAllData')
-          })
-        },
-      })
+    async handleDeleteDevice({ device, reason }) {
+      console.log(reason)
+      try {
+        await deleteDevice(this.rackId, device.id, { reason })
+        this.$message.success(this.$t('deleteSuccess'))
+        this.$emit('refreshRackAllData')
+      } catch (error) {
+        console.error('deleteDevice fail', error)
+        this.$message.error(this.$t('deleteFailed'))
+      }
     },
 
     migrateDevice(data) {

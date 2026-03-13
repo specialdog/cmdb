@@ -55,10 +55,11 @@ export function postDevice(rackId, deviceId, data) {
   })
 }
 
-export function deleteDevice(rackId, deviceId) {
+export function deleteDevice(rackId, deviceId, data) {
   return axios({
     url: `/v0.1/dcim/rack/${rackId}/device/${deviceId}`,
-    method: 'DELETE'
+    method: 'DELETE',
+    data
   })
 }
 

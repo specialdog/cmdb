@@ -141,7 +141,7 @@ export default {
       const formData = new FormData()
       formData.append('file', file)
       // 添加设备信息
-      formData.append('server_id', this.ci['server_id'])
+      formData.append('server_id', this.ci[this.ci['unique']])
       uploadCIImage(this.uploadUrl, formData).then(response => {
         onSuccess(response, file)
         message.success('上传成功')
@@ -164,7 +164,7 @@ export default {
     // 加载设备已有图片
     async loadDeviceImages() {
       try {
-        const response = await getCIImage(this.uploadUrl, { server_id: this.ci['server_id'] })
+        const response = await getCIImage(this.uploadUrl, { server_id: this.ci[this.ci['unique']] })
         this.fileList = (response.images || []).map((item, index) => ({
           uid: item.id || index,
           name: item.filename || `image_${index}`,
@@ -207,7 +207,7 @@ export default {
     // 删除图片
     handleRemove(file) {
       try {
-        const deleteFileData = Object.assign({}, { server_id: this.ci['server_id'] }, { 'filename': file.name })
+        const deleteFileData = Object.assign({}, { server_id: this.ci[this.ci['unique']] }, { 'filename': file.name })
         deleteCIImage(this.uploadUrl, deleteFileData).then(response => {
           this.loadDeviceImages()
           message.success('图片删除成功')

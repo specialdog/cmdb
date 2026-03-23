@@ -116,3 +116,19 @@ FROM
     WHERE c_value_index_texts.value in ({0})) AS {1}
 GROUP BY {1}.ci_id
 """
+
+QUERY_CI_BY_IP_RANGE = """
+SELECT *
+FROM 
+    (SELECT c_value_index_texts.ci_id
+    FROM c_value_index_texts
+    WHERE c_value_index_texts.value LIKE "{0}"
+    UNION
+    SELECT c_value_index_texts.ci_id
+    FROM c_value_index_texts
+    WHERE INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1)) <= INET_ATON("{1}")
+      AND INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', -1)) >= INET_ATON("{1}")
+      AND INET_ATON(TRIM(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1))) IS NOT NULL
+      AND INET_ATON(TRIM(SUBSTRING_INDEX(c_value_index_texts.value, '-', -1))) IS NOT NULL) AS {2}
+GROUP BY  {2}.ci_id
+"""

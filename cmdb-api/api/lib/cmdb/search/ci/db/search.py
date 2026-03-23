@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import re
 import copy
 import six
 import time
@@ -31,6 +32,7 @@ from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_NO_ATTR
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_NO_ATTR_IN
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_TYPE
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_UNION_CI_ATTRIBUTE_IS_NULL
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_IP_RANGE
 from api.lib.cmdb.utils import TableMap
 from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.perm.acl.acl import ACLManager
@@ -473,6 +475,14 @@ class Search(object):
 
         return result
 
+    @staticmethod
+    def _is_valid_ip(ip_str):
+        pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+        if not re.match(pattern, ip_str):
+            return False
+        parts = ip_str.split('.')
+        return all(0 <= int(part) <= 255 for part in parts)
+
     def __query_by_attr(self, q, queries, alias, is_sub=False):
         k = q.split(":")[0].strip()
         v = "\:".join(q.split(":")[1:]).strip()
@@ -553,8 +563,12 @@ class Search(object):
                 if not isinstance(q, list):
                     q = q.replace("'", "\\'")
                     q = q.replace('"', '\\"')
+                    q1 = q.replace("*", "")
                     q = q.replace("*", "%").replace('\\n', '%')
-                    _query_sql = QUERY_CI_BY_NO_ATTR.format(q, alias)
+                    if self._is_valid_ip(q1):
+                        _query_sql = QUERY_CI_BY_IP_RANGE.format(q, q1, alias)
+                    else:
+                        _query_sql = QUERY_CI_BY_NO_ATTR.format(q, alias)
                 else:
                     _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(",".join("'{0}'".format(v) for v in q), alias)
 

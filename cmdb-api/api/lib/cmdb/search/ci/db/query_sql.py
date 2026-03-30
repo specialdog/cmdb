@@ -94,6 +94,10 @@ FROM
     FROM c_value_index_texts
     WHERE c_value_index_texts.value LIKE "{0}"
     UNION
+    SELECT c_value_texts.ci_id
+    FROM c_value_texts
+    WHERE c_value_texts.value LIKE "{0}"
+    UNION
     SELECT c_value_index_integers.ci_id
     FROM c_value_index_integers
     WHERE c_value_index_integers.value LIKE "{0}"

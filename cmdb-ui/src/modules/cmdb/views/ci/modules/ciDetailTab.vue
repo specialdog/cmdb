@@ -30,8 +30,8 @@
                     :key="attr.name"
                     :span="8"
                   >
-                    <a-row :gutter="[8, 0]">
-                      <a-col :span="8">
+                    <a-row :gutter="[16, 0]"  type="flex" align="middle">
+                      <a-col flex="0 0 auto">
                         <span class="ci-detail-table-attr-label">
                           <a-tooltip :title="attr.alias || attr.name">
                             <span class="ci-detail-table-attr-label-text">{{ attr.alias || attr.name }}</span>
@@ -41,7 +41,7 @@
                       </a-col>
 
                       <a-col
-                        :span="16"
+                        flex="1 1 0"
                         class="ci-detail-table-attr-content"
                       >
                         <CIDetailAttrContent

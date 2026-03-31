@@ -77,6 +77,13 @@
           {{ getChoiceValueLabel(attr, ci[attr.name]) || ci[attr.name] }}
         </span>
       </template>
+      <template v-else-if="attr.is_bool">
+        <a-switch
+          :checked="ci[attr.name]"
+          @change="handleBoolChange"
+          :disabled="!showEdit || attr.is_computed || attr.sys_computed"
+        />
+      </template>
       <template v-else-if="attr.is_list">
         <span> {{ ci[attr.name] && Array.isArray(ci[attr.name]) ? ci[attr.name].join(',') : ci[attr.name] }}</span>
       </template>
@@ -186,7 +193,11 @@
         </a-form-item>
       </a-form>
     </template>
-    <a v-if="!isEdit && !attr.is_computed && !attr.sys_computed && showEdit" @click="handleEdit" :style="{ opacity: 0 }"><a-icon type="edit"/></a>
+    <a
+      v-if="!isEdit && !attr.is_computed && !attr.sys_computed && !attr.is_bool && showEdit"
+      @click="handleEdit"
+      :style="{ opacity: 0 }"><a-icon type="edit"/>
+    </a>
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
   </span>
 </template>
@@ -304,6 +315,16 @@ export default {
     //     this.$refs.jsonEditor.open(null, null, jsonData ? JSON.parse(jsonData) : {})
     //   }
     // },
+    async handleBoolChange(checked) {
+      await updateCI(this.ci._id, { [`${this.attr.name}`]: checked })
+        .then(() => {
+          this.$message.success(this.$t('updateSuccess'))
+          this.$emit('updateCIByself', { [`${this.attr.name}`]: checked }, this.attr.name)
+        })
+        .catch(() => {
+          this.$emit('refresh', this.attr.name)
+        })
+    },
     jsonEditorOk(jsonData) {
       if (!_.isEqual(this.ci[this.attr.name], jsonData)) {
         updateCI(this.ci._id, { [`${this.attr.name}`]: jsonData })

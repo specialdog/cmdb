@@ -130,9 +130,15 @@ FROM
     UNION
     SELECT c_value_index_texts.ci_id
     FROM c_value_index_texts
-    WHERE INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1)) <= INET_ATON("{1}")
-      AND INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', -1)) >= INET_ATON("{1}")
-      AND INET_ATON(TRIM(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1))) IS NOT NULL
-      AND INET_ATON(TRIM(SUBSTRING_INDEX(c_value_index_texts.value, '-', -1))) IS NOT NULL) AS {2}
+    WHERE INET_ATON("{1}") BETWEEN
+      INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1)) AND
+      INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', -1))
+    UNION
+    SELECT c_value_index_texts.ci_id
+    FROM c_value_index_texts
+    WHERE INET_ATON("{1}") BETWEEN
+      INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1)) AND
+      INET_ATON(CONCAT(SUBSTRING_INDEX(c_value_index_texts.value, '.', 3), '.', SUBSTRING_INDEX(c_value_index_texts.value, '-', -1)))
+    AS {2}
 GROUP BY  {2}.ci_id
 """

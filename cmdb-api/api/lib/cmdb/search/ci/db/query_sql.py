@@ -138,7 +138,7 @@ FROM
     FROM c_value_index_texts
     WHERE INET_ATON("{1}") BETWEEN
       INET_ATON(SUBSTRING_INDEX(c_value_index_texts.value, '-', 1)) AND
-      INET_ATON(CONCAT(SUBSTRING_INDEX(c_value_index_texts.value, '.', 3), '.', SUBSTRING_INDEX(c_value_index_texts.value, '-', -1)))
+      INET_ATON(CONCAT(SUBSTRING_INDEX(c_value_index_texts.value, '.', 3), '.', SUBSTRING_INDEX(c_value_index_texts.value, '-', -1))))
     AS {2}
 GROUP BY  {2}.ci_id
 """

@@ -2,7 +2,7 @@
   <div class="ci-reference-select">
     <!-- 搜索框 -->
     <a-input-search
-      :placeholder="$t('placeholder.search')"
+      :placeholder="$t(`请搜索${this.alias}ID`)"
       @search="handleSearch"
     />
 
@@ -107,6 +107,8 @@ export default {
       CIList: [],
       searchValue: '',
       innerReferenceShowAttrName: '',
+      unique_name: '',
+      alias: '',
       localSelectedValues: [] // 多选模式的本地临时选中值
     }
   },
@@ -148,6 +150,8 @@ export default {
         const res = await getCIType(this.referenceTypeId)
         const ciType = res?.ci_types?.[0]
         this.innerReferenceShowAttrName = ciType?.show_name || ciType?.unique_name || ''
+        this.unique_name = ciType?.unique_name || ''
+        this.alias = ciType?.alias || ''
       }
       await this.getCIList()
     },
@@ -156,8 +160,17 @@ export default {
       const attrName = this.referenceShowAttrName || this.innerReferenceShowAttrName || ''
       if (!attrName) return
 
+      let searchValue = ''
+      if (this.searchValue) {
+        if (typeof this.searchValue === 'object') {
+          const [key, value] = Object.entries(this.searchValue)[0]
+          searchValue = `,${key}:${value}`
+        } else {
+          searchValue = `,*${this.searchValue}*`
+        }
+      }
       const res = await searchCI({
-        q: `_type:${this.referenceTypeId}${this.searchValue ? `,*${this.searchValue}*` : ''}`,
+        q: `_type:${this.referenceTypeId}${searchValue}`,
         fl: attrName,
         count: this.pageSize,
         page: this.page
@@ -172,7 +185,7 @@ export default {
     },
 
     handleSearch(value) {
-      this.searchValue = value
+      this.searchValue = this.unique_name ? { [this.unique_name]: value } : { value }
       this.page = 1
       this.getCIList()
     },

@@ -20,7 +20,7 @@
       <!-- 上传提示 -->
       <div class="upload-tips">
         <a-icon type="info-circle" />
-        <span>支持jpg、png、gif格式, 单张图片不超过10MB, 最多上传6张</span>
+        <span>支持jpg、png、gif格式, 单张图片不超过30MB, 最多上传6张</span>
       </div>
     </div>
 
@@ -118,9 +118,9 @@ export default {
         return false
       }
 
-      const isLt10M = file.size / 1024 / 1024 < 10
-      if (!isLt10M) {
-        this.$message.error('图片大小不能超过 10MB!')
+      const isLt30M = file.size / 1024 / 1024 < 30
+      if (!isLt30M) {
+        this.$message.error('图片大小不能超过 30MB!')
         return false
       }
 

@@ -24,7 +24,7 @@
           <!-- 上传提示 -->
           <div class="upload-tips">
             <a-icon type="info-circle" />
-            <span>支持jpg、png、gif格式, 单张图片不超过10MB, 最多上传6张</span>
+            <span>支持jpg、png、gif格式, 单张图片不超过30MB, 最多上传6张</span>
           </div>
         </div>
 

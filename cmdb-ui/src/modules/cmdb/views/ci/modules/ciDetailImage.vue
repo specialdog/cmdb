@@ -184,9 +184,9 @@ export default {
         return false
       }
 
-      const isLt10M = file.size / 1024 / 1024 < 10
+      const isLt10M = file.size / 1024 / 1024 < 30
       if (!isLt10M) {
-        message.error('图片大小不能超过10MB!')
+        message.error('图片大小不能超过30MB!')
         return false
       }
 

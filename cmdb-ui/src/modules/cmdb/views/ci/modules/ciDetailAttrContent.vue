@@ -199,6 +199,7 @@
       :style="{ opacity: 0 }"><a-icon type="edit"/>
     </a>
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
+    <OfflineReasonModal ref="offlineReasonModalRef" @ok="handleOfflineConfirm" />
   </span>
 </template>
 
@@ -210,10 +211,11 @@ import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import PasswordField from '../../../components/passwordField/index.vue'
 import { getAttrPassword } from '../../../api/CITypeAttr'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
+import OfflineReasonModal from './OfflineReasonModal.vue'
 
 export default {
   name: 'CiDetailAttrContent',
-  components: { JsonEditor, PasswordField, CIReferenceAttr },
+  components: { JsonEditor, PasswordField, CIReferenceAttr, OfflineReasonModal },
   props: {
     ci: {
       type: Object,
@@ -316,10 +318,26 @@ export default {
     //   }
     // },
     async handleBoolChange(checked) {
+      if (this.attr.name === 'offline' && checked && !this.ci[this.attr.name]) {
+        const ciType = this.ci_types?.()?.find?.(t => t.id === this.ci._type) || {}
+        const ciName = this.ci[ciType.show_name] || this.ci[ciType.unique_key] || `CI #${this.ci._id}`
+        this.$refs.offlineReasonModalRef.open(this.ci, ciName)
+        return
+      }
       await updateCI(this.ci._id, { [`${this.attr.name}`]: checked })
         .then(() => {
           this.$message.success(this.$t('updateSuccess'))
           this.$emit('updateCIByself', { [`${this.attr.name}`]: checked }, this.attr.name)
+        })
+        .catch(() => {
+          this.$emit('refresh', this.attr.name)
+        })
+    },
+    handleOfflineConfirm({ reason }) {
+      updateCI(this.ci._id, { offline: true, offline_reason: reason, u_start: 0 })
+        .then(() => {
+          this.$message.success(this.$t('updateSuccess'))
+          this.$emit('updateCIByself', { offline: true }, this.attr.name)
         })
         .catch(() => {
           this.$emit('refresh', this.attr.name)

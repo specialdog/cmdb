@@ -722,7 +722,12 @@ if __name__ == "__main__":
         cover: '覆盖',
         detail: '详情',
         upstream: '上游',
-        downstream: '下游'
+        downstream: '下游',
+        offlineConfirmTitle: '确认下架',
+        offlineConfirmTip: '确认将该设备下架吗 (U位将被自动清零)？',
+        ciName: 'CI实例',
+        offlineReason: '下架原因',
+        offlineReasonPlaceholder: '请输入下架原因',
     },
     serviceTree: {
         remove: '移除',

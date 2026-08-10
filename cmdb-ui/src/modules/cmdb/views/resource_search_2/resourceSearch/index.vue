@@ -328,6 +328,17 @@ export default {
         })
       }
 
+      // 过滤掉 "ip段" CI 类型
+      const ipSegmentType = this.allCITypes.find(
+        (t) => t.name === 'ip段' || t.alias === 'ip段'
+      )
+      if (ipSegmentType) {
+        const idx = ciTypeIds.indexOf(ipSegmentType.id)
+        if (idx > -1) {
+          ciTypeIds.splice(idx, 1)
+        }
+      }
+
       let querySearchValue = ''
       if (searchValue) {
         if (

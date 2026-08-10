@@ -723,7 +723,12 @@ if __name__ == "__main__":
         cover: 'Cover',
         detail: 'Detail',
         upstream: 'Upstream',
-        downstream: 'Downstream'
+        downstream: 'Downstream',
+        offlineConfirmTitle: 'Confirm Offline',
+        offlineConfirmTip: 'Are you sure you want to set this device offline?',
+        ciName: 'CI Instance',
+        offlineReason: 'Offline Reason',
+        offlineReasonPlaceholder: 'Please enter the offline reason'
     },
     serviceTree: {
         remove: 'Remove',

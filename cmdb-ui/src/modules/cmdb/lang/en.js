@@ -940,7 +940,17 @@ if __name__ == "__main__":
         calcUnitFreeCountTip2: `Confirm that you want to calculate the number of free Units for all rack?`,
         rackImages: 'rack images',
         uploadImages: 'upload images',
-        uploadedImages: 'uploaded images'
+        uploadedImages: 'uploaded images',
+        networkPort: 'Network Port',
+        peerDev: 'Uplink Switch',
+        peerDevVal: 'click for detail',
+        peerDevPort: 'Uplink Port',
+        localDevPort: 'Local Port',
+        macAddress: 'MAC Address',
+        ipAddress: 'IP Address',
+        interfaceUsage: 'Interface Usage',
+        interfaceSpeed: 'Interface Speed',
+        remark: 'Remark',
     }
 }
 export default cmdb_en

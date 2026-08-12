@@ -6,6 +6,7 @@
         :countList="countList"
         :unitList="unitList"
         :rackId="rackData._id"
+        :networkInterfaceData="networkInterfaceData"
         @migrateDevice="migrateDevice"
         @openDeviceForm="openDeviceForm"
         @draggable="handleDraggable"
@@ -20,6 +21,7 @@
         :countList="countList"
         :unitList="unitList"
         :rackId="rackData._id"
+        :networkInterfaceData="networkInterfaceData"
         @migrateDevice="migrateDevice"
         @openDeviceForm="openDeviceForm"
         @draggable="handleDraggable"
@@ -83,6 +85,10 @@ export default {
     rackList: {
       type: Array,
       default: () => []
+    },
+    networkInterfaceData: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {

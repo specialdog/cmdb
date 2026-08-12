@@ -55,7 +55,10 @@
               }"
               @click="clickDevice(item)"
             >
-              <div class="rack-container-main-list-device-action">
+              <div
+                v-if="viewType === 'front'"
+                class="rack-container-main-list-device-action"
+              >
                 <div
                   class="rack-container-main-list-device-action-btn"
                   @click.stop="removeDevice(item)"
@@ -87,12 +90,87 @@
 
               <div class="rack-container-main-list-device-header"></div>
               <img
+                v-if="viewType === 'front'"
                 :src="item.deviceImage[viewType]"
                 class="rack-device-image"
                 :style="{
                   height: (unitHeight * item.unitCount - 6) + 'px'
                 }"
               />
+              <div
+                v-else
+                class="rack-device-image-rear"
+                :style="{
+                  height: (unitHeight * item.unitCount - 6) + 'px'
+                }"
+              />
+
+              <!-- 后视图：网口指示器 -->
+              <div
+                v-if="viewType === 'rear' && getDeviceNetworkPorts(item._id).length > 0"
+                class="rack-container-main-list-device-ports"
+              >
+                <a-popover
+                  v-for="(port, portIndex) in getDeviceNetworkPorts(item._id)"
+                  :key="portIndex"
+                  trigger="hover"
+                  placement="right"
+                  :overlayStyle="{ maxWidth: '320px' }"
+                >
+                  <template slot="content">
+                    <div class="port-popover">
+                      <div class="port-popover-title">{{ $t('cmdb.dcim.networkPort') }}</div>
+                      <div class="port-popover-table">
+                        <div class="port-popover-row" v-if="port.peer_dev">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.peerDev') }}</span>
+                          <a
+                            v-if="port.peer_dev_id && port.peer_dev_type"
+                            :href="`/cmdb/cidetail/${port.peer_dev_type}/${port.peer_dev_id}`"
+                            target="_blank"
+                            class="port-popover-link"
+                            @click.stop
+                          >{{ $t('cmdb.dcim.peerDevVal') }}</a>
+                          <span v-else class="port-popover-value">{{ port.peer_dev }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.local_dev_port">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.peerDevPort') }}</span>
+                          <span class="port-popover-value">{{ port.local_dev_port }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.peer_dev_port">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.localDevPort') }}</span>
+                          <span class="port-popover-value">{{ port.peer_dev_port }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.mac_address">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.macAddress') }}</span>
+                          <span class="port-popover-value">{{ port.mac_address }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.IP_ADDR">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.ipAddress') }}</span>
+                          <span class="port-popover-value">{{ port.IP_ADDR }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.interface_usage">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.interfaceUsage') }}</span>
+                          <span class="port-popover-value">{{ port.interface_usage }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.hd_speed">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.interfaceSpeed') }}</span>
+                          <span class="port-popover-value">{{ port.hd_speed }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.other_info">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.remark') }}</span>
+                          <span class="port-popover-value">{{ port.other_info }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  <img
+                    :src="netPortImage"
+                    class="rack-container-main-list-device-port"
+                    :style="getPortStyle(port, portIndex, item)"
+                    :class="{ 'port-connected': port.peer_dev, 'port-disconnected': !port.peer_dev }"
+                  />
+                </a-popover>
+              </div>
 
               <div
                 class="rack-container-main-list-device-sider"
@@ -166,6 +244,7 @@
 <script>
 import _ from 'lodash'
 import { deleteDevice } from '@/modules/cmdb/api/dcim.js'
+import netPortImage from '@/modules/cmdb/assets/dcim/net_port.png'
 
 import RackHeader from './rackHeader/index.vue'
 import draggable from 'vuedraggable'
@@ -198,13 +277,17 @@ export default {
     rackId: {
       type: Number,
       default: 0
+    },
+    networkInterfaceData: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
     return {
       oldDraggableList: [],
       draggableDevice: {},
-
+      netPortImage,
       unitHeight: 24
     }
   },
@@ -304,6 +387,23 @@ export default {
 
     openDeviceDetail(deviceData) {
       this.$emit('openDeviceDetail', deviceData)
+    },
+
+    getDeviceNetworkPorts(deviceId) {
+      if (!deviceId) return []
+      const deviceData = this.networkInterfaceData?.[String(deviceId)]
+      return deviceData?.interfaces || []
+    },
+
+    getPortStyle(port, portIndex, deviceItem) {
+      const totalPorts = this.getDeviceNetworkPorts(deviceItem._id).length
+      const deviceHeight = this.unitHeight * deviceItem.unitCount - 6
+      const portSize = Math.min(Math.max(deviceHeight / totalPorts - 2, 8), 16)
+
+      return {
+        width: portSize + 'px',
+        height: portSize + 'px'
+      }
     }
   }
 }
@@ -374,14 +474,52 @@ export default {
         .rack-device-image {
           width: 195px;
           height: auto;
-          max-height: calc(100% - 6px); /* 减去header高度 */
-          object-fit: contain; /* 保持图片比例，完整显示 */
-          /* 或者使用 object-fit: cover; 如果希望填满整个区域 */
+          max-height: calc(100% - 6px);
+          object-fit: contain;
+        }
+        .rack-device-image-rear {
+          width: 195px;
+          background-color: #2C2D31;
         }
         /* 保持原有img样式用于其他可能的图片 */
         img:not(.rack-device-image) {
           width: 195px;
           height: 17px;
+        }
+
+        /* 网口指示器 */
+        &-ports {
+          position: absolute;
+          left: 10%;
+          bottom: 10px;
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+          gap: 6px;
+          pointer-events: auto;
+        }
+
+        &-port {
+          border-radius: 3px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &.port-connected {
+            box-shadow: 0 0 4px 1px rgba(0, 180, 42, 0.55),
+                        0 0 10px 3px rgba(0, 180, 42, 0.3);
+          }
+
+          &.port-disconnected {
+            box-shadow: 0 0 4px 1px rgba(245, 63, 63, 0.55),
+                        0 0 10px 3px rgba(245, 63, 63, 0.3);
+          }
+
+          &:hover {
+            transform: scale(1.3);
+            z-index: 10;
+            box-shadow: 0 0 4px 1px rgba(16, 212, 255, 0.5),
+                        0 0 10px 3px rgba(16, 212, 255, 0.3) !important;
+          }
         }
 
         &-action {
@@ -583,6 +721,60 @@ export default {
       border: solid 1px #FFFFFF;
       box-shadow: 3px 3px 7px 0px rgba(136, 150, 163, 0.58) inset, -3px -3px 7px 0px #FFF inset;
     }
+  }
+}
+</style>
+
+<style lang="less">
+/* 网口悬浮弹窗样式（非scoped，因为a-popover内容渲染在body下） */
+.port-popover {
+  font-size: 12px;
+
+  &-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1D2129;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #E5E6EB;
+  }
+
+  &-table {
+    display: flex;
+    flex-direction: column;
+    row-gap: 4px;
+  }
+
+  &-row {
+    display: flex;
+    align-items: flex-start;
+    line-height: 20px;
+  }
+
+  &-label {
+    color: #86909C;
+    white-space: nowrap;
+    min-width: 70px;
+    flex-shrink: 0;
+
+    &::after {
+      content: ':';
+    }
+  }
+
+  &-value {
+    color: #1D2129;
+    word-break: break-all;
+  }
+}
+
+.port-popover-link {
+  color: #2F54EB;
+  word-break: break-all;
+
+  &:hover {
+    color: #3F75FF;
+    text-decoration: underline;
   }
 }
 </style>

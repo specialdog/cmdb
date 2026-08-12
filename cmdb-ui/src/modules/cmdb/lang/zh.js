@@ -939,7 +939,17 @@ if __name__ == "__main__":
         calcUnitFreeCountTip2: '确认要计算所有机架的空闲U数？',
         rackImages: '机架图片',
         uploadImages: '上传图片',
-        uploadedImages: '已上传图片'
+        uploadedImages: '已上传图片',
+        networkPort: '网口信息',
+        peerDev: '上行交换机',
+        peerDevVal: '点击详情',
+        peerDevPort: '上行端口',
+        localDevPort: '本端端口',
+        macAddress: 'MAC地址',
+        ipAddress: 'IP地址',
+        interfaceUsage: '接口用途',
+        interfaceSpeed: '接口速率',
+        remark: '备注',
     }
 }
 export default cmdb_zh

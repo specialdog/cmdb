@@ -57,6 +57,7 @@
             :rackData="rackData"
             :deviceList="deviceList"
             :rackList="rackList"
+            :networkInterfaceData="networkInterfaceData"
           />
         </a-tab-pane>
 
@@ -146,6 +147,7 @@ export default {
 
       CITypeRelations: [],
       deviceList: [],
+      networkInterfaceData: {}
     }
   },
   computed: {
@@ -199,6 +201,7 @@ export default {
       }
 
       await this.getDeviceList()
+      await this.getNetworkInterfaces()
     },
 
     async getDeviceList() {
@@ -210,6 +213,55 @@ export default {
       const deviceList = res?.result || []
       deviceList.sort((a, b) => a.u_start - b.u_start)
       this.deviceList = deviceList
+    },
+
+    async getNetworkInterfaces() {
+      // 遍历每台设备，调用 ci_relations/s 查询下游关系，
+      // 筛选 ci_type_alias === '物理机接口' 的 CI
+      const PEER_DEV_CI_TYPE = 28
+
+      if (!this.deviceList.length) {
+        this.networkInterfaceData = {}
+        return
+      }
+
+      const result = {}
+      const requests = this.deviceList.map(async (device) => {
+        try {
+          const res = await searchCIRelation(`root_id=${device._id}&level=1&count=10000`)
+          const children = res?.result || []
+          const interfaces = children.filter(
+            (ci) => ci.ci_type_alias === '物理机接口'
+          )
+          if (interfaces.length) {
+            result[String(device._id)] = {
+              device_name: device.hostname || device.name || String(device._id),
+              interfaces: interfaces.map((iface) => {
+                const peerDevVal = iface.peer_dev
+                const isNumeric = peerDevVal && /^\d+$/.test(String(peerDevVal))
+                return {
+                  _id: iface._id,
+                  peer_dev: peerDevVal || '',
+                  peer_dev_id: isNumeric ? Number(peerDevVal) : null,
+                  peer_dev_type: isNumeric ? PEER_DEV_CI_TYPE : null,
+                  peer_dev_port: iface.peer_dev_port || '',
+                  local_dev_port: iface.local_dev_port || '',
+                  mac_address: iface.mac_address || '',
+                  IP_ADDR: iface.IP_ADDR || '',
+                  interface_usage: iface.interface_usage || '',
+                  hd_speed: iface.hd_speed || '',
+                  other_info: iface.other_info || ''
+                }
+              })
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to load interfaces for device ${device._id}:`, error)
+        }
+      })
+
+      await Promise.all(requests)
+      this.networkInterfaceData = result
     },
 
     handleClose() {

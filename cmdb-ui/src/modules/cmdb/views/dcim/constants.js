@@ -34,6 +34,12 @@ export const DEVICE_CITYPE_MANUFACTURER2 = {
   '联想': 'lenovo'
 }
 
+export const STORAGE_CITYPE_MANUFACTURER = {
+  '宏杉': 'macrosan',
+  'HPE': 'hpe3par',
+  '惠普': 'hpe3par'
+}
+
 const createTypeNameMap = (typeObj, typeNameObj) => {
   const map = {}
 

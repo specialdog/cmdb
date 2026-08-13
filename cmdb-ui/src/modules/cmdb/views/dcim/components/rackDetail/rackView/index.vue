@@ -54,7 +54,7 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { putDevice } from '@/modules/cmdb/api/dcim.js'
-import { DEVICE_CITYPE_MANUFACTURER2, DEVICE_CITYPE_NAME } from '../../../constants.js'
+import { DEVICE_CITYPE_MANUFACTURER2, STORAGE_CITYPE_MANUFACTURER, DEVICE_CITYPE_NAME } from '../../../constants.js'
 
 import RackUnitView from './rackUnitView.vue'
 import DeviceForm from './deviceForm/index.vue'
@@ -140,7 +140,13 @@ export default {
       _deviceList.forEach((device, index) => {
         const CITYpe = CITypeMap?.[device?._type] || {}
 
-        device.deviceImage = this.getDeviceViewImage(CITYpe?.name, device?.server_manufacturers, device?.u_count)
+        const isStorageDevice = String(device?.class || '').includes('存储')
+        device.deviceImage = this.getDeviceViewImage(
+          isStorageDevice ? DEVICE_CITYPE_NAME.STORAGE : CITYpe?.name,
+          device?.server_manufacturers,
+          device?.u_count,
+          device?.server_name
+        )
         device.name = device?.[CITYpe?.show_key] || device._id || ''
         device.icon = CITYpe?.icon || ''
         device.CITypeName = CITYpe?.alias || CITYpe?.name || ''
@@ -204,10 +210,32 @@ export default {
       this.countList = Array.from({ length: this.rackData.u_count }, (_, i) => this.rackData.u_count - i)
     },
 
-    getDeviceViewImage(name, manu, u_count) {
+    getDeviceViewImage(name, manu, u_count, serverName) {
       const image = {
         front: require('@/modules/cmdb/assets/dcim/device/server_front.png'),
         rear: require('@/modules/cmdb/assets/dcim/device/server_rear.png')
+      }
+
+      const serverContext = require.context('@/modules/cmdb/assets/dcim/device/server',
+        false,
+        /\.png$/
+      )
+      const storageContext = require.context('@/modules/cmdb/assets/dcim/device/storage',
+        false,
+        /\.png$/
+      )
+
+      // 从指定 context 解析前/后视图：前视图缺失回退 front_1u，后视图缺失回退 rear_1u，
+      // 若目录内连 front_1u/rear_1u 也没有，则回退到通用 server_front/rear 图
+      const resolveByContext = (context, frontFileName) => {
+        const keys = context.keys()
+        const rearFileName = `rear_${u_count}u.png`
+        image.front = keys.includes(`./${frontFileName}`)
+          ? context(`./${frontFileName}`)
+          : (keys.includes('./front_1u.png') ? context('./front_1u.png') : image.front)
+        image.rear = keys.includes(`./${rearFileName}`)
+          ? context(`./${rearFileName}`)
+          : (keys.includes('./rear_1u.png') ? context('./rear_1u.png') : image.rear)
       }
 
       switch (name) {
@@ -219,26 +247,31 @@ export default {
           image.front = require('@/modules/cmdb/assets/dcim/device/firewall_front.png')
           image.rear = require('@/modules/cmdb/assets/dcim/device/firewall_rear.png')
           break
-        case DEVICE_CITYPE_NAME.STORAGE:
-        case DEVICE_CITYPE_NAME.SERVER:
-          const imageContext = require.context('@/modules/cmdb/assets/dcim/device/server',
-            false,
-            /\.png$/
-          )
+        case DEVICE_CITYPE_NAME.STORAGE: {
+          const serverNameStr = String(serverName || '')
+          const isStorageCabinet = serverNameStr.includes('盘柜') || serverNameStr.includes('盘框')
+
+          let frontFileName = `front_${u_count}u.png`
+          if (manu in STORAGE_CITYPE_MANUFACTURER) {
+            if (isStorageCabinet) {
+              frontFileName = `${STORAGE_CITYPE_MANUFACTURER[manu]}_${u_count}u.png`
+            } else {
+              frontFileName = `front_${u_count}u.png`
+            }
+          }
+          resolveByContext(storageContext, frontFileName)
+          break
+        }
+        case DEVICE_CITYPE_NAME.SERVER: {
           let frontFileName
           if (manu in DEVICE_CITYPE_MANUFACTURER2) {
             frontFileName = `${DEVICE_CITYPE_MANUFACTURER2[manu]}_${u_count}u.png`
           } else {
             frontFileName = `front_${u_count}u.png`
           }
-          const rearFileName = `rear_${u_count}u.png`
-          image.front = imageContext.keys().includes(`./${frontFileName}`)
-            ? imageContext(`./${frontFileName}`)
-            : imageContext('./front_1u.png')
-          image.rear = imageContext.keys().includes(`./${rearFileName}`)
-            ? imageContext(`./${rearFileName}`)
-            : imageContext('./rear_1u.png')
+          resolveByContext(serverContext, frontFileName)
           break
+        }
         case DEVICE_CITYPE_NAME.RAID:
           image.front = require('@/modules/cmdb/assets/dcim/device/raid_front.png')
           image.rear = require('@/modules/cmdb/assets/dcim/device/raid_rear.png')

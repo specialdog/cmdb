@@ -249,7 +249,8 @@ export default {
           break
         case DEVICE_CITYPE_NAME.STORAGE: {
           const serverNameStr = String(serverName || '')
-          const isStorageCabinet = serverNameStr.includes('盘柜') || serverNameStr.includes('盘框')
+          const STORAGE_KEYWORDS = ['盘柜', '盘框', '存储', '3par', '3PAR', 'storeone', 'Storeone']
+          const isStorageCabinet = STORAGE_KEYWORDS.some(keyword => serverNameStr.includes(keyword)) && !serverNameStr.includes('控制器')
 
           let frontFileName = `front_${u_count}u.png`
           if (manu in STORAGE_CITYPE_MANUFACTURER) {

@@ -113,6 +113,7 @@ class CIManager(object):
 
         ci_type = CITypeCache.get(ci.type_id)
         res["ci_type"] = ci_type.name
+        res["ci_type_alias"] = ci_type.alias
 
         ci_list = cls.get_cis_by_ids([str(ci_id)], fields=fields, ret_key=ret_key)
         ci_list and res.update(ci_list[0])
@@ -1464,6 +1465,55 @@ class CIRelationManager(object):
                 cls.add(parent_ci_id, child_ci_id,
                         valid=False,
                         source=RelationSourceEnum.ATTRIBUTE_VALUES)
+
+    @classmethod
+    def build_by_reference(cls, ci_dict):
+        """
+        Build relations automatically from reference attributes.
+
+        A reference attribute stores the id of the referenced CI instance.
+        When the current CI has a reference attribute pointing to another CI,
+        we create the model relation: referenced CI (first_ci, parent) contain current CI (second_ci, child).
+        """
+        ci_id = ci_dict.get('_id')
+        type_id = ci_dict.get('_type')
+        if not ci_id or not type_id:
+            return
+
+        for _, attr in CITypeAttributeManager.get_all_attributes(type_id):
+            if not attr.is_reference or not attr.reference_type_id:
+                continue
+
+            ref_value = ci_dict.get(attr.name)
+            if ref_value is None:
+                ref_ids = []
+            elif isinstance(ref_value, (list, tuple)):
+                ref_ids = list(ref_value)
+            else:
+                ref_ids = [ref_value]
+
+            try:
+                ref_ids = [int(i) for i in ref_ids if i is not None]
+            except (TypeError, ValueError):
+                ref_ids = []
+
+            # remove stale relations built from this reference attribute, then add current ones
+            cls.delete_relations_by_source(
+                RelationSourceEnum.ATTRIBUTE_VALUES,
+                second_ci_id=ci_id,
+                first_ci_type_id=attr.reference_type_id,
+                added=[(ref_id, ci_id) for ref_id in ref_ids])
+
+            for ref_id in ref_ids:
+                try:
+                    cls.add(first_ci_id=ref_id, second_ci_id=ci_id,
+                            valid=False,
+                            apply_async=False,
+                            source=RelationSourceEnum.ATTRIBUTE_VALUES)
+                except Exception as e:
+                    current_app.logger.warning(
+                        'build relation by reference failed: ci_id={0}, attr={1}, ref_id={2}, err={3}'.format(
+                            ci_id, attr.name, ref_id, e))
 
     @classmethod
     def rebuild_all_by_attribute(cls, ci_type_relation, uid):

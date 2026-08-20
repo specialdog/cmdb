@@ -70,7 +70,9 @@ def ci_cache(ci_id, operate_type, record_id):
                 payload[k] = v
         CITriggerManager.fire(operate_type, payload, record_id)
 
-    ci_dict and CIRelationManager.build_by_attribute(ci_dict)
+    if ci_dict:
+        CIRelationManager.build_by_attribute(ci_dict)
+        CIRelationManager.build_by_reference(ci_dict)
 
 
 @celery.task(name="cmdb.rebuild_relation_for_attribute_changed", queue=CMDB_QUEUE)

@@ -31,7 +31,8 @@ export const DEVICE_CITYPE_MANUFACTURER2 = {
   '惠普': 'hp',
   '科达': 'kedacom',
   '思科': 'cisco',
-  '联想': 'lenovo'
+  '联想': 'lenovo',
+  'NetApp': 'netapp'
 }
 
 export const STORAGE_CITYPE_MANUFACTURER = {

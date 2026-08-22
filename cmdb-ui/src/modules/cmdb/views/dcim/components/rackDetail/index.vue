@@ -216,8 +216,7 @@ export default {
     },
 
     async getNetworkInterfaces() {
-      // 遍历每台设备，调用 ci_relations/s 查询下游关系，
-      // 筛选 ci_type_alias === '物理机接口' 的 CI
+      // 遍历每台设备，调用 ci_relations/s 查询下游关系
       const PEER_DEV_CI_TYPE = 28
 
       if (!this.deviceList.length) {
@@ -231,7 +230,7 @@ export default {
           const res = await searchCIRelation(`root_id=${device._id}&level=1&count=10000`)
           const children = res?.result || []
           const interfaces = children.filter(
-            (ci) => ci.ci_type_alias === '物理机接口'
+            (ci) => ci.ci_type === 'physical_interface'
           )
           if (interfaces.length) {
             result[String(device._id)] = {

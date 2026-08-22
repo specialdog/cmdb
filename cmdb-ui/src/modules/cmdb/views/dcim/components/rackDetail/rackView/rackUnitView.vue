@@ -107,7 +107,7 @@
 
               <!-- 后视图：网口指示器 -->
               <div
-                v-if="viewType === 'rear' && getDeviceNetworkPorts(item._id).length > 0"
+                v-if="viewType === 'rear' && !isSwitchDevice(item) && getDeviceNetworkPorts(item._id).length > 0"
                 class="rack-container-main-list-device-ports"
               >
                 <a-popover
@@ -251,6 +251,7 @@ import draggable from 'vuedraggable'
 import CIIcon from '@/modules/cmdb/components/ciIcon/index.vue'
 import AbnormalModal from './abnormalModal.vue'
 import DeleteDeviceModal from './deleteDeviceModal.vue'
+import { DEVICE_CITYPE_NAME } from '../../../constants.js'
 
 export default {
   name: 'RackUnitView',
@@ -387,6 +388,15 @@ export default {
 
     openDeviceDetail(deviceData) {
       this.$emit('openDeviceDetail', deviceData)
+    },
+
+    isSwitchDevice(item) {
+      // 交换机端口在前面板，后视图不展示网口；如需排除其他网络设备可在此扩展
+      const networkTypes = [
+        DEVICE_CITYPE_NAME.SWITCH,
+        DEVICE_CITYPE_NAME.FC_SWITCH
+      ]
+      return networkTypes.includes(item?.CITypeNameEn)
     },
 
     getDeviceNetworkPorts(deviceId) {

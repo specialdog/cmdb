@@ -151,6 +151,7 @@ export default {
         device.icon = CITYpe?.icon || ''
         device.CITypeName = CITYpe?.alias || CITYpe?.name || ''
         device.id = device._id
+        device.CITypeNameEn = CITYpe?.name || ''
 
         if (index > 0) {
           const abnormalDevice = _deviceList.slice(0, index).find((item) => {

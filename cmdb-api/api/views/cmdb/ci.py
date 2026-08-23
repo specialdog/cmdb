@@ -82,6 +82,8 @@ class CIView(APIView):
 
         exist_policy = request.values.pop('exist_policy', None)
 
+        reference_by = request.values.pop('reference_by', None)
+
         ci_dict = self._wrap_ci_dict()
 
         manager = CIManager()
@@ -90,6 +92,7 @@ class CIView(APIView):
                             _no_attribute_policy=_no_attribute_policy,
                             _is_admin=request.values.pop('__is_admin', None) or False,
                             ticket_id=ticket_id,
+                            reference_by=reference_by,
                             **ci_dict)
 
         return self.jsonify(ci_id=ci_id)

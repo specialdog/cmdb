@@ -22,7 +22,8 @@ export function uploadData(ciId, data) {
     data: {
       ...data,
       ci_type: ciId,
-      exist_policy: 'replace'
+      exist_policy: 'replace',
+      reference_by: 'unique'
     },
     isShowMessage: false
   })

@@ -305,10 +305,16 @@ class CIManager(object):
         return 1
 
     @staticmethod
-    def _reference_to_ci_id(attr, payload):
+    def _reference_to_ci_id(attr, payload, match_by=None):
         def __unique_value2id(_type, _v):
-            value_table = TableMap(attr_name=_type.unique_id).table
-            ci = value_table.get_by(attr_id=attr.id, value=_v)
+            unique_attr = AttributeCache.get(_type.unique_id)
+            value_table = TableMap(attr=unique_attr).table
+            ci = value_table.get_by(attr_id=unique_attr.id, value=_v, first=True, to_dict=False)
+            if ci is None:
+                alt = str(_v) if not isinstance(_v, str) else (int(_v) if _v.isdigit() else None)
+                if alt is not None:
+                    ci = value_table.get_by(attr_id=unique_attr.id, value=alt, first=True, to_dict=False)
+
             if ci is not None:
                 return ci.ci_id
 
@@ -329,25 +335,35 @@ class CIManager(object):
         if not reference_value:
             return
 
-        reference_type = None
-        if isinstance(reference_value, list):
-            for idx, v in enumerate(reference_value):
-                if isinstance(v, dict) and v.get('unique'):
-                    if reference_type is None:
-                        reference_type = CITypeCache.get(attr.reference_type_id)
-                    if reference_type is not None:
-                        reference_value[idx] = __unique_value2id(reference_type, v)
-                else:
-                    __valid_reference_id_existed(v, attr.reference_type_id)
-
-        elif isinstance(reference_value, dict) and reference_value.get('unique'):
+        if match_by == 'unique':
+            # 批量导入：单元格值按被引用模型的唯一标识反查 CI id
+            reference_type = CITypeCache.get(attr.reference_type_id)
             if reference_type is None:
-                reference_type = CITypeCache.get(attr.reference_type_id)
-            if reference_type is not None:
+                return
+            if isinstance(reference_value, list):
+                reference_value = [__unique_value2id(reference_type, v) for v in reference_value]
+            else:
                 reference_value = __unique_value2id(reference_type, reference_value)
-        elif str(reference_value).isdigit():
-            reference_value = int(reference_value)
-            __valid_reference_id_existed(reference_value, attr.reference_type_id)
+        else:
+            reference_type = None
+            if isinstance(reference_value, list):
+                for idx, v in enumerate(reference_value):
+                    if isinstance(v, dict) and v.get('unique'):
+                        if reference_type is None:
+                            reference_type = CITypeCache.get(attr.reference_type_id)
+                        if reference_type is not None:
+                            reference_value[idx] = __unique_value2id(reference_type, v.get('unique'))
+                    else:
+                        __valid_reference_id_existed(v, attr.reference_type_id)
+
+            elif isinstance(reference_value, dict) and reference_value.get('unique'):
+                if reference_type is None:
+                    reference_type = CITypeCache.get(attr.reference_type_id)
+                if reference_type is not None:
+                    reference_value = __unique_value2id(reference_type, reference_value.get('unique'))
+            elif str(reference_value).isdigit():
+                reference_value = int(reference_value)
+                __valid_reference_id_existed(reference_value, attr.reference_type_id)
 
         payload[k] = reference_value
 
@@ -359,6 +375,7 @@ class CIManager(object):
             _is_admin=False,
             ticket_id=None,
             _sync=False,
+            reference_by=None,
             **ci_dict):
         """
         add ci
@@ -454,7 +471,7 @@ class CIManager(object):
                     if attr.re_check and password_dict.get(attr.id):
                         value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
                 elif attr.is_reference:
-                    cls._reference_to_ci_id(attr, ci_dict)
+                    cls._reference_to_ci_id(attr, ci_dict, match_by=reference_by)
 
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
@@ -512,7 +529,7 @@ class CIManager(object):
 
         return ci.id
 
-    def update(self, ci_id, _is_admin=False, ticket_id=None, _sync=False, **ci_dict):
+    def update(self, ci_id, _is_admin=False, ticket_id=None, _sync=False, reference_by=None, **ci_dict):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
         ci_type = ci.ci_type
@@ -550,7 +567,7 @@ class CIManager(object):
                 if attr.re_check and password_dict.get(attr.id):
                     value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
             elif attr.is_reference:
-                self._reference_to_ci_id(attr, ci_dict)
+                self._reference_to_ci_id(attr, ci_dict, match_by=reference_by)
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 

@@ -109,6 +109,7 @@ import { DCIM_TYPE } from '../../constants.js'
 import { deleteDCIM } from '@/modules/cmdb/api/dcim.js'
 import { getCITypeChildren } from '@/modules/cmdb/api/CITypeRelation'
 import { searchCIRelation } from '@/modules/cmdb/api/CIRelation'
+import { searchCI2 } from '@/modules/cmdb/api/ci'
 
 import RackView from './rackView/index.vue'
 import RackGroupAttr from './rackGroupAttr/index.vue'
@@ -147,7 +148,8 @@ export default {
 
       CITypeRelations: [],
       deviceList: [],
-      networkInterfaceData: {}
+      networkInterfaceData: {},
+      peerDevCache: {}
     }
   },
   computed: {
@@ -249,7 +251,9 @@ export default {
                   IP_ADDR: iface.IP_ADDR || '',
                   interface_usage: iface.interface_usage || '',
                   hd_speed: iface.hd_speed || '',
-                  other_info: iface.other_info || ''
+                  other_info: iface.other_info || '',
+                  peer_netdev_name: '',
+                  peer_description: ''
                 }
               })
             }
@@ -260,7 +264,55 @@ export default {
       })
 
       await Promise.all(requests)
+
+      await this.loadPeerDevInfo(result)
+
       this.networkInterfaceData = result
+    },
+
+    async loadPeerDevInfo(result) {
+      // 收集所有数字类型的 peer_dev_id 并去重
+      const peerDevIds = new Set()
+      Object.values(result).forEach((deviceData) => {
+        (deviceData.interfaces || []).forEach((iface) => {
+          if (iface.peer_dev_id) {
+            peerDevIds.add(iface.peer_dev_id)
+          }
+        })
+      })
+
+      if (!peerDevIds.size) {
+        return
+      }
+
+      // 只批量查询缓存中缺失的上游交换机
+      const missIds = Array.from(peerDevIds).filter((id) => !this.peerDevCache[id])
+
+      if (missIds.length) {
+        try {
+          const res = await searchCI2(`q=_id:(${missIds.join(';')})&count=10000`)
+          const cis = res?.result || []
+          cis.forEach((ci) => {
+            this.peerDevCache[ci._id] = {
+              netdev_name: ci.netdev_name || '',
+              description: ci.description || ''
+            }
+          })
+        } catch (error) {
+          console.error('Failed to load peer device info:', error)
+        }
+      }
+
+      // 回填 netdev_name / description
+      Object.values(result).forEach((deviceData) => {
+        (deviceData.interfaces || []).forEach((iface) => {
+          const cache = iface.peer_dev_id ? this.peerDevCache[iface.peer_dev_id] : null
+          if (cache) {
+            iface.peer_netdev_name = cache.netdev_name || ''
+            iface.peer_description = cache.description || ''
+          }
+        })
+      })
     },
 
     handleClose() {

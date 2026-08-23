@@ -943,6 +943,7 @@ if __name__ == "__main__":
         networkPort: '网口信息',
         peerDev: '上行交换机',
         peerDevVal: '点击详情',
+        peerDevDesc: '描述',
         peerDevPort: '上行端口',
         localDevPort: '本端端口',
         macAddress: 'MAC地址',

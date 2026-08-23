@@ -124,13 +124,24 @@
                         <div class="port-popover-row" v-if="port.peer_dev">
                           <span class="port-popover-label">{{ $t('cmdb.dcim.peerDev') }}</span>
                           <a
-                            v-if="port.peer_dev_id && port.peer_dev_type"
+                            v-if="port.peer_dev_id && port.peer_dev_type && port.peer_netdev_name"
+                            :href="`/cmdb/cidetail/${port.peer_dev_type}/${port.peer_dev_id}`"
+                            target="_blank"
+                            class="port-popover-link"
+                            @click.stop
+                          >{{ port.peer_netdev_name }}</a>
+                          <a
+                            v-else-if="port.peer_dev_id && port.peer_dev_type"
                             :href="`/cmdb/cidetail/${port.peer_dev_type}/${port.peer_dev_id}`"
                             target="_blank"
                             class="port-popover-link"
                             @click.stop
                           >{{ $t('cmdb.dcim.peerDevVal') }}</a>
                           <span v-else class="port-popover-value">{{ port.peer_dev }}</span>
+                        </div>
+                        <div class="port-popover-row" v-if="port.peer_description">
+                          <span class="port-popover-label">{{ $t('cmdb.dcim.peerDevDesc') }}</span>
+                          <span class="port-popover-value">{{ port.peer_description }}</span>
                         </div>
                         <div class="port-popover-row" v-if="port.local_dev_port">
                           <span class="port-popover-label">{{ $t('cmdb.dcim.peerDevPort') }}</span>

@@ -944,6 +944,7 @@ if __name__ == "__main__":
         networkPort: 'Network Port',
         peerDev: 'Uplink Switch',
         peerDevVal: 'click for detail',
+        peerDevDesc: 'Description',
         peerDevPort: 'Uplink Port',
         localDevPort: 'Local Port',
         macAddress: 'MAC Address',
